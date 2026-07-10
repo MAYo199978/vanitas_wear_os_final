@@ -193,6 +193,7 @@ class MainActivity : ComponentActivity(), SensorEventListener, MessageClient.OnM
             when (event.path) {
                 "/photo_taken" -> { cameraReady = true; showNotification("Cámara lista") }
                 "/photo_captured" -> { isProcessing = false; cameraReady = false; showNotification("Capturada exitosamente", NotificationType.SUCCESS) }
+                "/photo_deleted" -> { showNotification("Foto eliminada exitosamente", NotificationType.SUCCESS) }
                 "/stt_text" -> { lastVoiceMessage = String(event.data); showNotification(String(event.data), NotificationType.INFO) }
             }
         }

@@ -238,6 +238,17 @@ class MainActivity : AppCompatActivity(), DataClient.OnDataChangedListener, Mess
         try { speechLauncher.launch(intent) } catch (e: Exception) {}
     }
 
+    private fun sendPhotoDeletedNotification() {
+        val nodeClient = Wearable.getNodeClient(this)
+        val messageClient = Wearable.getMessageClient(this)
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val nodes = nodeClient.connectedNodes.await()
+                nodes.forEach { messageClient.sendMessage(it.id, "/photo_deleted", null) }
+            } catch (e: Exception) {}
+        }
+    }
+
     private fun sendTextToWatch(text: String) {
         val messageClient = Wearable.getMessageClient(this)
         val nodeClient = Wearable.getNodeClient(this)
@@ -555,7 +566,21 @@ fun PhotoGalleryScreen(activity: MainActivity, onBack: () -> Unit, onPhotoDel: (
             }
         } } }
     }
-    if (showDel) AlertDialog(onDismissRequest = { showDel = false }, title = { Text("Borrar foto") }, text = { Text("¿Deseas eliminar esta captura?") }, confirmButton = { TextButton(onClick = { selectedPhoto?.delete(); photos = listPhotoFiles(context); showDel = false; onPhotoDel() }) { Text("Borrar", color = Color.Red) } }, dismissButton = { TextButton(onClick = { showDel = false }) { Text("Cancelar") } })
+    if (showDel) AlertDialog(
+        onDismissRequest = { showDel = false },
+        title = { Text("Borrar foto") },
+        text = { Text("¿Deseas eliminar esta captura?") },
+        confirmButton = {
+            TextButton(onClick = {
+                selectedPhoto?.delete()
+                photos = listPhotoFiles(context)
+                showDel = false
+                onPhotoDel()
+                activity.sendPhotoDeletedNotification()
+            }) { Text("Borrar", color = Color.Red) }
+        },
+        dismissButton = { TextButton(onClick = { showDel = false }) { Text("Cancelar") } }
+    )
 }
 
 fun listPhotoFiles(context: android.content.Context): List<File> {

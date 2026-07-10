@@ -43,8 +43,9 @@ import com.google.android.gms.wearable.Asset
 import com.google.android.gms.wearable.PutDataMapRequest
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalDensity
@@ -248,29 +249,76 @@ fun WearMainScreen(
             }
         }
 
-        // Steps Card (Matching Image)
+        // Steps Card (Advanced)
         item {
+            val animatedProgress by animateFloatAsState(
+                targetValue = (steps / 10000f).coerceIn(0f, 1f),
+                animationSpec = tween(1200, easing = FastOutSlowInEasing),
+                label = "steps"
+            )
             Card(
                 onClick = {},
-                modifier = Modifier.fillMaxWidth().height(100.dp),
-                shape = RoundedCornerShape(16.dp),
-                backgroundPainter = CardDefaults.cardBackgroundPainter(startBackgroundColor = Color(0xFF1C1C2E))
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(110.dp)
+                    .border(1.dp, Brush.linearGradient(listOf(Color(0xFF4CC9F0).copy(0.4f), Color(0xFF7209B7).copy(0.4f))), RoundedCornerShape(24.dp)),
+                shape = RoundedCornerShape(24.dp),
+                backgroundPainter = CardDefaults.cardBackgroundPainter(
+                    startBackgroundColor = Color(0xFF1C1C2E),
+                    endBackgroundColor = Color(0xFF0D0D17)
+                )
             ) {
-                Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Pasos hoy", color = Color.Gray, fontSize = 8.sp)
-                        Text(String.format("%,d", steps), color = Color(0xFF4CC9F0), fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Box(modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape).background(Color(0xFF2D2D44))) {
-                            Box(modifier = Modifier.fillMaxWidth( (steps/10000f).coerceIn(0f, 1f) ).fillMaxHeight().background(Color(0xFF4CC9F0)))
+                        Text("PASOS", color = Color.Gray, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                        Text(
+                            String.format("%,d", steps),
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(6.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF2D2D44))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(animatedProgress)
+                                    .fillMaxHeight()
+                                    .background(Brush.horizontalGradient(listOf(Color(0xFF4CC9F0), Color(0xFF4361EE))))
+                            )
                         }
                     }
                     Box(modifier = Modifier.size(60.dp), contentAlignment = Alignment.Center) {
-                        Canvas(modifier = Modifier.size(50.dp)) {
-                            drawArc(Color(0xFF1C1C2E), 0f, 360f, false, style = Stroke(4.dp.toPx()))
-                            drawArc(Color(0xFF7209B7), -90f, (steps / 10000f) * 360f, false, style = Stroke(4.dp.toPx(), cap = StrokeCap.Round))
+                        Canvas(modifier = Modifier.size(48.dp)) {
+                            drawArc(
+                                Color(0xFF2D2D44),
+                                0f,
+                                360f,
+                                false,
+                                style = Stroke(6.dp.toPx())
+                            )
+                            drawArc(
+                                Color(0xFF7209B7),
+                                -90f,
+                                animatedProgress * 360f,
+                                false,
+                                style = Stroke(6.dp.toPx(), cap = StrokeCap.Round)
+                            )
                         }
-                        Icon(Icons.Rounded.DirectionsWalk, null, tint = Color(0xFF7209B7), modifier = Modifier.size(16.dp))
+                        Icon(
+                            Icons.Rounded.DirectionsWalk,
+                            null,
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 }
             }
@@ -318,19 +366,45 @@ fun WearMainScreen(
 
 @Composable
 fun SensorSmallCard(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String, accent: Color, modifier: Modifier) {
+    val isHeart = label.contains("Latidos")
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val scale by if (isHeart) {
+        infiniteTransition.animateFloat(
+            initialValue = 1f,
+            targetValue = 1.15f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(800, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "scale"
+        )
+    } else {
+        remember { mutableStateOf(1f) }
+    }
+
     Card(
         onClick = {},
-        modifier = modifier.height(55.dp),
-        shape = RoundedCornerShape(12.dp),
-        backgroundPainter = CardDefaults.cardBackgroundPainter(startBackgroundColor = Color(0xFF1C1C2E))
+        modifier = modifier
+            .height(65.dp)
+            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(18.dp)),
+        shape = RoundedCornerShape(18.dp),
+        backgroundPainter = CardDefaults.cardBackgroundPainter(startBackgroundColor = Color(0xFF1C1C2E).copy(alpha = 0.9f))
     ) {
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, null, tint = accent, modifier = Modifier.size(12.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(label, color = Color.Gray, fontSize = 6.sp)
+                Icon(
+                    icon, 
+                    null, 
+                    tint = accent, 
+                    modifier = Modifier.size(15.dp).graphicsLayer(scaleX = scale, scaleY = scale)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(label, color = Color.Gray, fontSize = 7.sp, fontWeight = FontWeight.Bold)
             }
-            Text(value, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(value, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
         }
     }
 }
@@ -339,11 +413,13 @@ fun SensorSmallCard(icon: androidx.compose.ui.graphics.vector.ImageVector, label
 fun QuickActionIcon(icon: androidx.compose.ui.graphics.vector.ImageVector, color: Color, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = Modifier.size(36.dp),
-        shape = RoundedCornerShape(10.dp),
+        modifier = Modifier
+            .size(40.dp)
+            .border(1.dp, color.copy(alpha = 0.4f), RoundedCornerShape(12.dp)),
+        shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF1C1C2E))
     ) {
-        Icon(icon, null, tint = color, modifier = Modifier.size(18.dp))
+        Icon(icon, null, tint = color, modifier = Modifier.size(20.dp))
     }
 }
 

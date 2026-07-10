@@ -42,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.*
@@ -70,6 +71,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.animation.core.*
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.compositeOver
 
 class MainActivity : AppCompatActivity(), DataClient.OnDataChangedListener, MessageClient.OnMessageReceivedListener {
     private val dataClient by lazy { Wearable.getDataClient(this) }
@@ -296,28 +301,126 @@ fun MainScreen(steps: Int, temp: Float?, hr: Float?, hb: Float?, bat: Int?, hum:
 
 @Composable
 fun WelcomeHeader() {
-    Column(modifier = Modifier.padding(vertical = 24.dp)) {
-        Text("¡Hola, Paulina! 👋", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Text("Bienvenida a SmartHealth Sync", color = Color.Gray, fontSize = 14.sp)
+    Row(
+        modifier = Modifier
+            .padding(vertical = 32.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text("¡Hola, Paulina! 👋", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
+            Text("Tu salud está sincronizada", color = Color.Gray, fontSize = 14.sp)
+        }
+        
+        // Live Status Badge
+        Surface(
+            color = Color(0xFF4CAF50).copy(alpha = 0.1f),
+            shape = RoundedCornerShape(12.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4CAF50).copy(alpha = 0.5f))
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+                val alpha by infiniteTransition.animateFloat(
+                    initialValue = 0.4f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(1000, easing = FastOutSlowInEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "alpha"
+                )
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .graphicsLayer(alpha = alpha)
+                        .background(Color(0xFF4CAF50), CircleShape)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("EN VIVO", color = Color(0xFF4CAF50), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+            }
+        }
     }
 }
 
 @Composable
 fun StepsCard(steps: Int) {
-    Card(modifier = Modifier.fillMaxWidth().height(180.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C2E))) {
-        Row(modifier = Modifier.padding(20.dp).fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Pasos hoy", color = Color.Gray, fontSize = 14.sp)
-                Text(String.format("%,d", steps), color = Color(0xFF4CC9F0), fontSize = 32.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(16.dp))
-                LinearProgressIndicator(progress = (steps / 10000f).coerceAtMost(1f), modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape), color = Color(0xFF4CC9F0), trackColor = Color(0xFF2D2D44))
-            }
-            Box(modifier = Modifier.size(100.dp), contentAlignment = Alignment.Center) {
-                Canvas(modifier = Modifier.size(80.dp)) {
-                    drawArc(Color(0xFF2D2D44), 0f, 360f, false, style = Stroke(8.dp.toPx(), cap = StrokeCap.Round))
-                    drawArc(Color(0xFF7209B7), -90f, (steps / 10000f) * 360f, false, style = Stroke(8.dp.toPx(), cap = StrokeCap.Round))
+    val animatedProgress by animateFloatAsState(
+        targetValue = (steps / 10000f).coerceAtMost(1f),
+        animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
+        label = "stepsAnimation"
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .shadow(20.dp, RoundedCornerShape(32.dp), ambientColor = Color(0xFF4CC9F0), spotColor = Color(0xFF7209B7))
+            .border(1.dp, Brush.linearGradient(listOf(Color(0xFF4CC9F0).copy(0.5f), Color(0xFF7209B7).copy(0.5f))), RoundedCornerShape(32.dp)),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color(0xFF1C1C2E), Color(0xFF0D0D17))
+                    )
+                )
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("PASOS DE HOY", color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp)
+                    Text(
+                        String.format("%,d", steps),
+                        color = Color.White,
+                        fontSize = 42.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Box(modifier = Modifier.fillMaxWidth().height(10.dp).clip(CircleShape).background(Color(0xFF2D2D44))) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(animatedProgress)
+                                .fillMaxHeight()
+                                .background(Brush.horizontalGradient(listOf(Color(0xFF4CC9F0), Color(0xFF4361EE))))
+                        )
+                    }
+                    Text("Objetivo: 10,000", color = Color.Gray, fontSize = 10.sp, modifier = Modifier.padding(top = 4.dp))
                 }
-                Icon(Icons.Rounded.DirectionsWalk, null, tint = Color(0xFF7209B7), modifier = Modifier.size(32.dp))
+                Box(modifier = Modifier.size(110.dp), contentAlignment = Alignment.Center) {
+                    Canvas(modifier = Modifier.size(90.dp)) {
+                        drawArc(
+                            Color(0xFF2D2D44),
+                            0f,
+                            360f,
+                            false,
+                            style = Stroke(12.dp.toPx(), cap = StrokeCap.Round)
+                        )
+                        drawArc(
+                            Brush.sweepGradient(listOf(Color(0xFF7209B7), Color(0xFFF72585), Color(0xFF7209B7))),
+                            -90f,
+                            animatedProgress * 360f,
+                            false,
+                            style = Stroke(12.dp.toPx(), cap = StrokeCap.Round)
+                        )
+                    }
+                    Icon(
+                        Icons.Rounded.DirectionsWalk,
+                        null,
+                        tint = Color.White,
+                        modifier = Modifier.size(38.dp)
+                    )
+                }
             }
         }
     }
@@ -345,10 +448,54 @@ fun HealthSection(tab: String, temp: Float?, hr: Float?, hb: Float?, bat: Int?, 
 
 @Composable
 fun SensorSmallCard(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String, accent: Color, modifier: Modifier) {
-    Card(modifier = modifier.height(100.dp), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C2E))) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) { Icon(icon, null, tint = accent, modifier = Modifier.size(16.dp)); Spacer(modifier = Modifier.width(4.dp)); Text(label, color = Color.Gray, fontSize = 10.sp) }
-            Spacer(modifier = Modifier.height(8.dp)); Text(value, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+    val isHeart = label.contains("Latidos") || label.contains("Cardíaco")
+    val infiniteTransition = rememberInfiniteTransition(label = "iconPulse")
+    val scale by if (isHeart) {
+        infiniteTransition.animateFloat(
+            initialValue = 1f,
+            targetValue = 1.2f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(800, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "scale"
+        )
+    } else {
+        remember { mutableStateOf(1f) }
+    }
+
+    Card(
+        modifier = modifier
+            .height(120.dp)
+            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp)),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C2E).copy(alpha = 0.8f))
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(accent.copy(alpha = 0.15f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    icon,
+                    null,
+                    tint = accent,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .graphicsLayer(scaleX = scale, scaleY = scale)
+                )
+            }
+            Column {
+                Text(label, color = Color.Gray, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                Text(value, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+            }
         }
     }
 }
@@ -368,8 +515,15 @@ fun QuickActions(onCam: () -> Unit, onGal: () -> Unit, onSTT: () -> Unit, update
 
 @Composable
 fun QuickButton(icon: androidx.compose.ui.graphics.vector.ImageVector, color: Color, onClick: () -> Unit, modifier: Modifier) {
-    Button(onClick = onClick, modifier = modifier.height(60.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C1C2E))) {
-        Icon(icon, null, tint = color, modifier = Modifier.size(28.dp))
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .height(65.dp)
+            .border(1.dp, color.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C1C2E))
+    ) {
+        Icon(icon, null, tint = color, modifier = Modifier.size(30.dp))
     }
 }
 

@@ -42,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.*
@@ -293,20 +294,72 @@ fun WelcomeHeader() {
 
 @Composable
 fun StepsCard(steps: Int) {
-    Card(modifier = Modifier.fillMaxWidth().height(180.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C2E))) {
-        Row(modifier = Modifier.padding(20.dp).fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Pasos hoy", color = Color.Gray, fontSize = 14.sp)
-                Text(String.format("%,d", steps), color = Color(0xFF4CC9F0), fontSize = 32.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(16.dp))
-                LinearProgressIndicator(progress = (steps / 10000f).coerceAtMost(1f), modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape), color = Color(0xFF4CC9F0), trackColor = Color(0xFF2D2D44))
-            }
-            Box(modifier = Modifier.size(100.dp), contentAlignment = Alignment.Center) {
-                Canvas(modifier = Modifier.size(80.dp)) {
-                    drawArc(Color(0xFF2D2D44), 0f, 360f, false, style = Stroke(8.dp.toPx(), cap = StrokeCap.Round))
-                    drawArc(Color(0xFF7209B7), -90f, (steps / 10000f) * 360f, false, style = Stroke(8.dp.toPx(), cap = StrokeCap.Round))
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp)
+            .border(1.dp, Color(0xFF2D2D44), RoundedCornerShape(24.dp)),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color(0xFF1C1C2E), Color(0xFF0D0D17))
+                    )
+                )
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(20.dp)
+                    .fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Pasos hoy", color = Color.Gray, fontSize = 14.sp)
+                    Text(
+                        String.format("%,d", steps),
+                        color = Color(0xFF4CC9F0),
+                        fontSize = 36.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    LinearProgressIndicator(
+                        progress = (steps / 10000f).coerceAtMost(1f),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(CircleShape),
+                        color = Color(0xFF4CC9F0),
+                        trackColor = Color(0xFF2D2D44)
+                    )
                 }
-                Icon(Icons.Rounded.DirectionsWalk, null, tint = Color(0xFF7209B7), modifier = Modifier.size(32.dp))
+                Box(modifier = Modifier.size(100.dp), contentAlignment = Alignment.Center) {
+                    Canvas(modifier = Modifier.size(85.dp)) {
+                        drawArc(
+                            Color(0xFF2D2D44),
+                            0f,
+                            360f,
+                            false,
+                            style = Stroke(10.dp.toPx(), cap = StrokeCap.Round)
+                        )
+                        drawArc(
+                            Color(0xFF7209B7),
+                            -90f,
+                            (steps / 10000f) * 360f,
+                            false,
+                            style = Stroke(10.dp.toPx(), cap = StrokeCap.Round)
+                        )
+                    }
+                    Icon(
+                        Icons.Rounded.DirectionsWalk,
+                        null,
+                        tint = Color(0xFF7209B7),
+                        modifier = Modifier.size(34.dp)
+                    )
+                }
             }
         }
     }
@@ -334,10 +387,26 @@ fun HealthSection(tab: String, temp: Float?, hr: Float?, hb: Float?, bat: Int?, 
 
 @Composable
 fun SensorSmallCard(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String, accent: Color, modifier: Modifier) {
-    Card(modifier = modifier.height(100.dp), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C2E))) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) { Icon(icon, null, tint = accent, modifier = Modifier.size(16.dp)); Spacer(modifier = Modifier.width(4.dp)); Text(label, color = Color.Gray, fontSize = 10.sp) }
-            Spacer(modifier = Modifier.height(8.dp)); Text(value, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+    Card(
+        modifier = modifier
+            .height(110.dp)
+            .border(1.dp, Color(0xFF2D2D44).copy(alpha = 0.5f), RoundedCornerShape(20.dp)),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C2E))
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, null, tint = accent, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(label, color = Color.Gray, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(value, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -357,8 +426,15 @@ fun QuickActions(onCam: () -> Unit, onGal: () -> Unit, onSTT: () -> Unit, update
 
 @Composable
 fun QuickButton(icon: androidx.compose.ui.graphics.vector.ImageVector, color: Color, onClick: () -> Unit, modifier: Modifier) {
-    Button(onClick = onClick, modifier = modifier.height(60.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C1C2E))) {
-        Icon(icon, null, tint = color, modifier = Modifier.size(28.dp))
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .height(65.dp)
+            .border(1.dp, color.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C1C2E))
+    ) {
+        Icon(icon, null, tint = color, modifier = Modifier.size(30.dp))
     }
 }
 

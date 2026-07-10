@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">SmartHealth Sync</string>
+    <string name="hello_world">SmartHealth Sync</string>
+    <string name="tile_label">SmartHealth Sync</string>
+    <string name="complication_label">SmartHealth</string>
+</resources>

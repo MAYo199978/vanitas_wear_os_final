@@ -247,29 +247,71 @@ fun WearMainScreen(
             }
         }
 
-        // Steps Card (Matching Image)
+        // Steps Card (Improved)
         item {
             Card(
                 onClick = {},
-                modifier = Modifier.fillMaxWidth().height(100.dp),
-                shape = RoundedCornerShape(16.dp),
-                backgroundPainter = CardDefaults.cardBackgroundPainter(startBackgroundColor = Color(0xFF1C1C2E))
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(105.dp)
+                    .border(1.dp, Color(0xFF2D2D44), RoundedCornerShape(20.dp)),
+                shape = RoundedCornerShape(20.dp),
+                backgroundPainter = CardDefaults.cardBackgroundPainter(
+                    startBackgroundColor = Color(0xFF1C1C2E),
+                    endBackgroundColor = Color(0xFF0D0D17)
+                )
             ) {
-                Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Pasos hoy", color = Color.Gray, fontSize = 8.sp)
-                        Text(String.format("%,d", steps), color = Color(0xFF4CC9F0), fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Box(modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape).background(Color(0xFF2D2D44))) {
-                            Box(modifier = Modifier.fillMaxWidth( (steps/10000f).coerceIn(0f, 1f) ).fillMaxHeight().background(Color(0xFF4CC9F0)))
+                        Text("Pasos", color = Color.Gray, fontSize = 9.sp)
+                        Text(
+                            String.format("%,d", steps),
+                            color = Color(0xFF4CC9F0),
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(5.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF2D2D44))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth((steps / 10000f).coerceIn(0f, 1f))
+                                    .fillMaxHeight()
+                                    .background(Color(0xFF4CC9F0))
+                            )
                         }
                     }
-                    Box(modifier = Modifier.size(60.dp), contentAlignment = Alignment.Center) {
-                        Canvas(modifier = Modifier.size(50.dp)) {
-                            drawArc(Color(0xFF1C1C2E), 0f, 360f, false, style = Stroke(4.dp.toPx()))
-                            drawArc(Color(0xFF7209B7), -90f, (steps / 10000f) * 360f, false, style = Stroke(4.dp.toPx(), cap = StrokeCap.Round))
+                    Box(modifier = Modifier.size(55.dp), contentAlignment = Alignment.Center) {
+                        Canvas(modifier = Modifier.size(45.dp)) {
+                            drawArc(
+                                Color(0xFF2D2D44),
+                                0f,
+                                360f,
+                                false,
+                                style = Stroke(5.dp.toPx())
+                            )
+                            drawArc(
+                                Color(0xFF7209B7),
+                                -90f,
+                                (steps / 10000f) * 360f,
+                                false,
+                                style = Stroke(5.dp.toPx(), cap = StrokeCap.Round)
+                            )
                         }
-                        Icon(Icons.Rounded.DirectionsWalk, null, tint = Color(0xFF7209B7), modifier = Modifier.size(16.dp))
+                        Icon(
+                            Icons.Rounded.DirectionsWalk,
+                            null,
+                            tint = Color(0xFF7209B7),
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
             }
@@ -319,17 +361,22 @@ fun WearMainScreen(
 fun SensorSmallCard(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String, accent: Color, modifier: Modifier) {
     Card(
         onClick = {},
-        modifier = modifier.height(55.dp),
-        shape = RoundedCornerShape(12.dp),
+        modifier = modifier
+            .height(60.dp)
+            .border(1.dp, Color(0xFF2D2D44).copy(alpha = 0.5f), RoundedCornerShape(14.dp)),
+        shape = RoundedCornerShape(14.dp),
         backgroundPainter = CardDefaults.cardBackgroundPainter(startBackgroundColor = Color(0xFF1C1C2E))
     ) {
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, null, tint = accent, modifier = Modifier.size(12.dp))
+                Icon(icon, null, tint = accent, modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(label, color = Color.Gray, fontSize = 6.sp)
+                Text(label, color = Color.Gray, fontSize = 7.sp, fontWeight = FontWeight.Medium)
             }
-            Text(value, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(value, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -338,11 +385,13 @@ fun SensorSmallCard(icon: androidx.compose.ui.graphics.vector.ImageVector, label
 fun QuickActionIcon(icon: androidx.compose.ui.graphics.vector.ImageVector, color: Color, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = Modifier.size(36.dp),
-        shape = RoundedCornerShape(10.dp),
+        modifier = Modifier
+            .size(40.dp)
+            .border(1.dp, color.copy(alpha = 0.4f), RoundedCornerShape(12.dp)),
+        shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF1C1C2E))
     ) {
-        Icon(icon, null, tint = color, modifier = Modifier.size(18.dp))
+        Icon(icon, null, tint = color, modifier = Modifier.size(20.dp))
     }
 }
 

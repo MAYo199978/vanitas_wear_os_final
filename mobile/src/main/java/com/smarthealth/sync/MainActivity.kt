@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
 import androidx.compose.animation.core.*
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.shadow
@@ -293,6 +294,7 @@ fun MainScreen(steps: Int, temp: Float?, hr: Float?, hb: Float?, bat: Int?, hum:
                     item { HealthSection(tab, temp, hr, hb, bat, hum, press) }
                 }
                 item { QuickActions(onCam, onGal, onSTT, photosUp) }
+                item { TeamSection() }
                 item { Spacer(modifier = Modifier.height(20.dp)) }
             }
         }
@@ -309,7 +311,7 @@ fun WelcomeHeader() {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
-            Text("¡Hola, Paulina! 👋", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
+            Text("¡Hola, Alberto! 👋", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
             Text("Tu salud está sincronizada", color = Color.Gray, fontSize = 14.sp)
         }
         
@@ -524,6 +526,76 @@ fun QuickButton(icon: androidx.compose.ui.graphics.vector.ImageVector, color: Co
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C1C2E))
     ) {
         Icon(icon, null, tint = color, modifier = Modifier.size(30.dp))
+    }
+}
+
+@Composable
+fun TeamSection() {
+    val team = listOf(
+        "Alberto Gomez",
+        "Paulina Mendez",
+        "Sergio Lopez",
+        "Abner Rodriguez"
+    )
+
+    Column(modifier = Modifier.padding(vertical = 24.dp)) {
+        Text("Nuestro Equipo", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("Desarrolladores de SmartHealth Sync", color = Color.Gray, fontSize = 12.sp)
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        androidx.compose.foundation.lazy.LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(end = 16.dp)
+        ) {
+            items(team.size) { index ->
+                TeamMemberCard(team[index])
+            }
+        }
+    }
+}
+
+@Composable
+fun TeamMemberCard(name: String) {
+    val imageRes = when (name) {
+        "Alberto Gomez" -> R.drawable.foto_alberto
+        "Paulina Mendez" -> R.drawable.foto_paulina
+        "Sergio Lopez" -> R.drawable.foto_sergio
+        "Abner Rodriguez" -> R.drawable.foto_abner
+        else -> R.drawable.ic_launcher_background
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(100.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .border(
+                    2.dp,
+                    Brush.linearGradient(listOf(Color(0xFF4CC9F0), Color(0xFF7209B7))),
+                    CircleShape
+                )
+                .padding(4.dp)
+                .clip(CircleShape)
+                .background(Color(0xFF1C1C2E))
+        ) {
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = name,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = name,
+            color = Color.White,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            maxLines = 2
+        )
     }
 }
 

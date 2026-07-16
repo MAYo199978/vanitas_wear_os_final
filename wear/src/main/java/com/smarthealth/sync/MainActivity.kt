@@ -244,7 +244,7 @@ fun WearMainScreen(
         // Header
         item {
             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp), horizontalAlignment = Alignment.Start) {
-                Text("¡Hola, Paulina! 👋", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text("¡Hola, Alberto! 👋", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 Text("Bienvenida a SmartHealth Sync", color = Color.Gray, fontSize = 8.sp)
             }
         }
